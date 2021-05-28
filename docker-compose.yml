@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: cl_nginx
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./static/:/static
+      - ./media/:/media
+    depends_on:
+      - django
+    restart: always
+
+  django:
+    container_name: cl_django
+    build: .
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASS: "${POSTGRES_PASS}"
+    command: >
+      bash -c '
+      gunicorn cl.wsgi:application --bind 0.0.0.0:8001
+      '
+    volumes:
+      - .:/code
+    ports:
+      - "8001:8001"
+    expose:
+      - "8001"
+    restart: always
+
+  db:
+    container_name: cl_db
+    hostname: db
+    image: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: club
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASS: "${POSTGRES_PASS}"
+    ports:
+      - "5433:5432"
+    expose:
+      - "5432"
+
+# docker exec -it cl_django python manage.py migrate
+# docker exec -it cl_django python manage.py createsuperuser
+# docker exec -it cl_django python manage.py collectstatic

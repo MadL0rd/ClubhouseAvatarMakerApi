@@ -1,0 +1,6 @@
+gunicorn
+Django==3.1.2
+djangorestframework==3.12.1
+psycopg2-binary==2.8.6
+pillow==8.0.1
+django-request-logging
